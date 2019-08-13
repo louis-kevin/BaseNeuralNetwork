@@ -1,40 +1,77 @@
 let train = true
 let dataset
 let neural
+let players = []
+const quantityOfPlayers = 1000
+let balls = []
+let games = []
+let timeToCreateBall = 3000
+let timeOfLastBall = 0
+let frameRateNumber = 60
+let score = 0
+
 
 function setup(){
-    createCanvas(500, 500);
-    background(0);
+    createCanvas(700, 500);
+    frameRate(frameRateNumber);
 
-    neural = new RedeNeural(2, 3, 1)
+    scoreElem = createDiv('Score = 0');
+    scoreElem.position(20, 20);
+    scoreElem.id = 'score';
+    scoreElem.style('color', 'white');
 
-    dataset = {
-        inputs: [
-            [1, 1],
-            [1, 0],
-            [0, 1],
-            [0, 0]
-        ],
-        outputs: [
-            [0],
-            [1],
-            [1],
-            [0]
-        ]
+
+    for(let i = 0; i <= quantityOfPlayers; i++){
+        games.push({
+            player: new Player,
+            balls: []
+        })
     }
-    
 }
 
 function draw(){ 
-    if(train){
-        for(let i = 0; i < 10000; i++) {
-            let index = floor(random(4))
-            neural.train(dataset.inputs[index], dataset.outputs[index])
+    background(0);
+    noStroke()
+    handleBalls()
+    handlePlayer()
+    trainNeural()
+}
+
+function handleBalls(balls){
+    if(frameCount % frameRateNumber == 0){
+        timeOfLastBall -= 1000
+    }
+    if(timeOfLastBall <= 0){
+        timeOfLastBall = timeToCreateBall
+        const ball = new Ball()
+        games.forEach(game => game.balls.push(ball))
+    }
+
+   games = games.map(game => {
+    game.balls = game.balls.filter(ball => {
+        ball.display()
+        if(ball.collision(game.player)){
+           
+            return false
         }
 
-        if(neural.predict([0, 0])[0] < 0.04 && neural.predict([1, 0])[0] > 0.98){
-            train = false
-            console.log('terminou')
+        return !ball.reachToTheEnd()
+    })
+    return game
+   })
+}
+
+function handlePlayer(){
+    games.forEach(game => game.player.display())
+}
+
+function trainNeural(){
+    
+    games.forEach(game => {
+        if(game.balls.length <= 0){
+            return
         }
-    }
+        let nextBall = game.balls[0]
+        game.player.train(nextBall)
+    })
 }
