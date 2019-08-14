@@ -1,13 +1,13 @@
-function sigmoid(x){
-    return 1/(1+Math.exp(-x));
+function sigmoid(x) {
+    return 1 / (1 + Math.exp(-x));
 }
 
-function dsigmoid(x){
+function dsigmoid(x) {
     return x * (1 - x)
 }
 
 class RedeNeural {
-    constructor(input, hidden, output, parentPlayer){
+    constructor(input, hidden, output, parentPlayer) {
         this.input = input
         this.hidden = hidden
         this.output = output
@@ -20,27 +20,27 @@ class RedeNeural {
         this.input_to_hidden_bias.randomize()
         this.hidden_to_output_bias.randomize()
 
-        if(parentPlayer){
+        if (parentPlayer) {
             this.input_to_hidden_weight = Matrix.mutate(parentPlayer.input_to_hidden_weight)
             this.hidden_to_output_weight = Matrix.mutate(parentPlayer.hidden_to_output_weight)
-        }else{
+        } else {
             this.input_to_hidden_weight.randomize()
             this.hidden_to_output_weight.randomize()
         }
-        
+
 
         this.learning_rate = 0.1
 
     }
 
-    print(){
+    print() {
         this.input_to_hidden_bias.print()
         this.hidden_to_output_bias.print()
         this.input_to_hidden_weight.print()
         this.hidden_to_output_weight.print()
     }
 
-    train(arr, target){
+    train(arr, target) {
         let input = Matrix.arrayToMatrix(arr);
         let hidden = Matrix.multiply(this.input_to_hidden_weight, input)
 
@@ -84,7 +84,7 @@ class RedeNeural {
         return Matrix.matrixToArray(output)
     }
 
-    predict(arr){
+    predict(arr) {
         let input = Matrix.arrayToMatrix(arr);
         let hidden = Matrix.multiply(this.input_to_hidden_weight, input)
 
