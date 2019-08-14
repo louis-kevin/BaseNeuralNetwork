@@ -1,14 +1,15 @@
 class Ball {
-    constructor(){
+    constructor(x){
         this.height = 10
         this.width = 10
-        this.velocity = 5
+        this.velocity = 6
         this.y = 0
-        this.x = Math.floor(Math.random() * height)
+        this.x = x
     }
 
     display(){
         this.y += this.velocity
+        fill(255)
         ellipse(this.x, this.y, this.height, this.width);
     }
 

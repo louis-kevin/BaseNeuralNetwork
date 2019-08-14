@@ -9,19 +9,21 @@ function getRandomColor() {
   
 
 class Player {
-    constructor() {
+    constructor(parentPlayer) {
         this.width = 130
         this.height = 20
 
-        this.velocity = 5
+        this.velocity = 10
 
         this.x = width/2 - this.width /2
         this.y = height - 40
 
         this.randomColor = getRandomColor()
 
-        this.neural = new RedeNeural(4, 8, 2)
+        this.neural = new RedeNeural(4, 8, 2, winnerPlayer ? winnerPlayer.neural : null)
+        this.score = 0
 
+        this.dead = false
 
     }
 
@@ -42,12 +44,21 @@ class Player {
     }
 
     display() {
+        if(this.dead) return
         fill(this.randomColor)
         rect(this.x, this.y, this.width, this.height);
     }
 
-    train(ball){
-        const result = this.neural.predict([this.x, this.y, ball.x, ball.y])
+    addScore(point = 1){
+        this.score += point
+    }
+
+    removeScore(point = 1){
+        this.score -= point
+    }
+
+    calculateByBall(ball){
+        const result = this.neural.predict([this.x - this.width /2, this.x + this.width /2, ball.x, ball.y])
 
         if(result[0] >= 0.70){
             this.moveToLeft()

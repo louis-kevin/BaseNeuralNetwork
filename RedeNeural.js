@@ -7,22 +7,27 @@ function dsigmoid(x){
 }
 
 class RedeNeural {
-    constructor(input, hidden, output){
+    constructor(input, hidden, output, parentPlayer){
         this.input = input
         this.hidden = hidden
         this.output = output
 
         this.input_to_hidden_bias = new Matrix(hidden, 1)
-        this.input_to_hidden_bias.randomize()
-
         this.hidden_to_output_bias = new Matrix(output, 1)
+        this.input_to_hidden_weight = new Matrix(hidden, input)
+        this.hidden_to_output_weight = new Matrix(output, hidden)
+
+        this.input_to_hidden_bias.randomize()
         this.hidden_to_output_bias.randomize()
 
-        this.input_to_hidden_weight = new Matrix(hidden, input)
-        this.input_to_hidden_weight.randomize()
-
-        this.hidden_to_output_weight = new Matrix(output, hidden)
-        this.hidden_to_output_weight.randomize()
+        if(parentPlayer){
+            this.input_to_hidden_weight = Matrix.mutate(parentPlayer.input_to_hidden_weight)
+            this.hidden_to_output_weight = Matrix.mutate(parentPlayer.hidden_to_output_weight)
+        }else{
+            this.input_to_hidden_weight.randomize()
+            this.hidden_to_output_weight.randomize()
+        }
+        
 
         this.learning_rate = 0.1
 
@@ -76,6 +81,7 @@ class RedeNeural {
 
         this.input_to_hidden_weight = Matrix.add(this.input_to_hidden_weight, input_to_hidden_weight)
 
+        return Matrix.matrixToArray(output)
     }
 
     predict(arr){

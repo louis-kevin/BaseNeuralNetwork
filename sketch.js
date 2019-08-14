@@ -1,77 +1,152 @@
-let train = true
-let dataset
-let neural
+const quantityOfPlayers = 10
 let players = []
-const quantityOfPlayers = 1000
-let balls = []
-let games = []
-let timeToCreateBall = 3000
+let deadPlayers = []
+let timeToCreateBall = 2000
 let timeOfLastBall = 0
 let frameRateNumber = 60
-let score = 0
+let winnerPlayer
+let balls = []
 
 
 function setup(){
-    createCanvas(700, 500);
-    frameRate(frameRateNumber);
+    createCanvas(700, 500)
+    frameRate(frameRateNumber)
 
-    scoreElem = createDiv('Score = 0');
-    scoreElem.position(20, 20);
-    scoreElem.id = 'score';
-    scoreElem.style('color', 'white');
-
-
-    for(let i = 0; i <= quantityOfPlayers; i++){
-        games.push({
-            player: new Player,
-            balls: []
-        })
-    }
+    addPlayers()
 }
 
 function draw(){ 
-    background(0);
+    background(0)
     noStroke()
     handleBalls()
     handlePlayer()
     trainNeural()
 }
 
-function handleBalls(balls){
-    if(frameCount % frameRateNumber == 0){
+function addPlayers(){
+    if(winnerPlayer) players.push(winnerPlayer)
+
+    for(let i = 0; i <= quantityOfPlayers; i++){
+        players.push(new Player(getParent()))
+    }
+
+    deadPlayers = []
+}
+
+function getParent(){
+    if(!deadPlayers.length || !winnerPlayer) return null
+
+    let rand = Math.floor(Math.random * winnerPlayer.score);
+    let runningSum = 0
+
+    for (let i = 0; i< deadPlayers.length; i++) {
+      runningSum+= deadPlayers[i].score;
+      if (runningSum > rand) {
+        return deadPlayers[i]
+      }
+    }
+}
+
+function handleBalls(){
+    if(frameCount % 30 == 0){
         timeOfLastBall -= 1000
     }
+
     if(timeOfLastBall <= 0){
         timeOfLastBall = timeToCreateBall
-        const ball = new Ball()
-        games.forEach(game => game.balls.push(ball))
+        let ballPosition = Math.floor(Math.random() * height)
+        balls.push(new Ball(ballPosition)) 
     }
 
-   games = games.map(game => {
-    game.balls = game.balls.filter(ball => {
-        ball.display()
-        if(ball.collision(game.player)){
-           
-            return false
+    balls.map(ball => ball.display())
+
+
+    if(balls.length <= 0){
+        return
+    }
+
+    let ballDead = false
+
+    let nextBall = balls[0]
+
+    for(let i = 0; i < players.length; i++){
+        if(players[i].dead){
+            continue
         }
 
-        return !ball.reachToTheEnd()
+        if(nextBall.collision(players[i])){
+            players[i].addScore()
+            ballDead = true
+            continue
+        }
+    }
+
+    if(ballDead || nextBall.reachToTheEnd()){
+        for(let i = 0; i < players.length; i++){
+            if(players[i].dead){
+                continue
+            }
+           players[i].dead = !nextBall.collision(players[i])
+        }
+        balls.splice(0, 1)
+    }
+
+    if(allPlayersDead()){
+        findWinnerPlayer()
+        balls = []
+        timeOfLastBall = timeToCreateBall
+        deadPlayers = players
+        players = []
+        addPlayers()
+    }
+}
+
+function findWinnerPlayer(){
+    players.forEach(player => {
+        if(!winnerPlayer && player.score > 0){
+            winnerPlayer = player
+            return
+        }
+        if(!winnerPlayer){
+            return
+        }
+        if(player.score > winnerPlayer.score){
+            winnerPlayer = player
+        }
     })
-    return game
-   })
+}
+
+function printScores(){
+    players.forEach(player => {
+       console.log(player.score)
+    })
+}
+
+function allPlayersDead(){
+    return players.filter(player => !player.dead).length <= 0
 }
 
 function handlePlayer(){
-    games.forEach(game => game.player.display())
+    for(let i = 0; i < players.length; i++){
+        players[i].display()
+    }
 }
 
 function trainNeural(){
-    
-    games.forEach(game => {
-        if(game.balls.length <= 0){
-            return
-        }
-        let nextBall = game.balls[0]
-        game.player.train(nextBall)
-    })
+    if(balls.length <= 0){
+        return
+    }
+
+    let nextBall = balls[0]
+
+    for(let i = 0; i < players.length; i++){
+        players[i].calculateByBall(nextBall)
+    }
+}
+
+function iteratePlayers(func){
+    let total = players.length
+    for(let i = 0; i < total; i++){
+        func(i)
+    }
 }

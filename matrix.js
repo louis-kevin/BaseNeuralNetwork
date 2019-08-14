@@ -124,4 +124,17 @@ class Matrix {
 
         return matrix;
     }
+
+    static mutate(matrix){
+        const mutationRate = 0.3
+        let mutatedMatrix = new Matrix(matrix.rows, matrix.columns)
+        mutatedMatrix.map((item, i, j) => {
+            const rand = Math.random();
+            if(rand < mutationRate){
+                return Math.random()*2 - 1
+            }
+            return matrix.data[i][j]
+        })
+        return mutatedMatrix;
+    }
 }
