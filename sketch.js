@@ -1,4 +1,4 @@
-const quantityOfPlayers = 10
+const quantityOfPlayers = 700
 let population
 const timeToCreateBall = 2000
 let timeOfLastBall = 0
@@ -42,13 +42,13 @@ function draw() {
 }
 
 function handleCreationOfBalls() {
-    if (frameCount % 30 == 0) {
+    if (frameCount % frameRateNumber == 0) {
         timeOfLastBall -= 1000
     }
 
     if (timeOfLastBall <= 0) {
         timeOfLastBall = timeToCreateBall
-        balls.push(new Ball(velocity))
+        balls.push(new Ball())
     }
 }
 
@@ -64,13 +64,13 @@ function handleBalls() {
 
     if (!nextBall) return
 
+    population.train(nextBall)
+
     population = nextBall.interactWithPlayers(population)
 
     if (nextBall.dead) {
         balls.splice(0, 1)
     }
-
-    population.train(nextBall)
 }
 
 function showScore(){

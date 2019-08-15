@@ -13,7 +13,7 @@ class Player {
         this.width = 130
         this.height = 20
 
-        this.velocity = 10
+        this.velocity = 5
 
         this.x = width / 2 - this.width / 2
         this.y = height - 40
@@ -24,7 +24,13 @@ class Player {
         this.score = 0
 
         this.dead = false
+    }
 
+    display() {
+        if (this.dead) return this
+        fill(this.color)
+        rect(this.x, this.y, this.width, this.height);
+        return this
     }
 
     moveToRight() {
@@ -46,14 +52,8 @@ class Player {
         return this
     }
 
-    display() {
-        if (this.dead) return this
-        fill(this.color)
-        rect(this.x, this.y, this.width, this.height);
-        return this
-    }
-
     addScore(point = 1) {
+        this.velocity += 0.02
         this.score += point
         return this
     }
@@ -66,11 +66,11 @@ class Player {
     calculateByBall(ball) {
         const result = this.neural.predict([this.x - this.width / 2, this.x + this.width / 2, ball.x, ball.y])
 
-        if (result[0] >= 0.70) {
+        if (result[0] >= 0.75) {
             this.moveToLeft()
         }
 
-        if (result[1] >= 0.70) {
+        if (result[1] >= 0.75) {
             this.moveToRight()
         }
 

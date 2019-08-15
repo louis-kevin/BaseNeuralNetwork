@@ -8,6 +8,7 @@ class Ball {
         this.y = 0
         this.x = Math.floor(Math.random() * height)
         this.dead = false
+        this.hit = false
     }
 
     display() {
@@ -36,22 +37,38 @@ class Ball {
     }
 
     interactWithPlayers(population) {
-        return population.map(player => {
+        if(this.y <= height - 40) return population
+
+        this.dead = true
+
+        let hit = false
+
+        population = population.map(player => {
             if (player.dead) return player
 
-            let colission = false
+            let colission = this.collision(player)
 
-            if (this.collision(player)) {
-                colission = true
-                player.addScore()
-                if(velocity < 20) velocity += 0.08
-                this.dead = true
-            } else if(this.reachToTheEnd() || this.dead){
+            if(!colission){
                 player.dead = true
                 this.dead = true
+
+                return player
+            }
+
+            player.addScore()
+
+            if(velocity < 5 && !hit){
+                velocity += 0.08 
+                hit = true
             }
 
             return player
         })
+
+        if(population.allPlayersDead()){
+            velocity = 5
+        }
+
+        return population
     }
 }
